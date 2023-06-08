@@ -1,0 +1,242 @@
+cce302@ictorcl
+
+select table_name from user_tables;
+
+create table PERSON(driver_id varchar(30), name varchar(50), address varchar(100), primary key(driver_id));
+
+create table CAR(regno varchar(20), model varchar(30), Year int, primary key(regno));
+
+create table ACCIDENT(report_number int, accd_date date, location varchar(50), primary key(report_number));
+
+alter table PERSON modify address varchar(15);
+
+alter table PERSON modify name varchar(15);
+
+create table OWNS(
+  2  driver_id varchar(30),
+  3  regno varchar(20),
+  4  primary key(driver_id, regno),
+  5  constraint fk1 foreign key (driver_id) references PERSON(driver_id),
+  6  constraint fk2 foreign key (regno) references CAR(regno));
+
+create table PARTICIPATED(
+  2  driver_id varchar(30),
+  3  regno varchar(20),
+  4  report_number int,
+  5  damage_amount int,
+  6  primary key(driver_id,regno,report_number),
+  7  constraint k1 foreign key (driver_id) references PERSON(driver_id),
+  8  constraint k2 foreign key (regno) references CAR(regno),
+  9  constraint k3 foreign key (report_number) references ACCIDENT(report_number));
+
+
+insert into PERSON values('SN-112','Nithya','302-abc layout');
+
+SQL> insert into PERSON values('SN-111','Juhi','789-brb layout');
+
+SQL> insert into PERSON values('SN-110','Pooja','123-mbm layout');
+
+SQL> insert into PERSON values('SN-113','Nandini','102-mrm layout');
+
+SQL> insert into PERSON values('SN-114','Ram','145-com layout');
+
+SQL> insert into PERSON values('SN-115','Shyam','275-pam layout');
+
+
+SQL> insert into CAR values('KA-22-MN-2881','Toyota',2021);
+
+SQL> insert into CAR values('KA-07-WX-5331','Nissan',2020);
+
+SQL> insert into CAR values('TN-19-RT-9712','Ford',2022);
+
+SQL> insert into CAR values('MH-07-MT-3412','Jaguar',2022);
+ 
+SQL> insert into CAR values('TS-27-UH-6089','Honda',2021);
+
+SQL> insert into CAR values('UP-27-UH-6089','Kia',2023);
+
+
+SQL> insert into ACCIDENT values(7321, to_date('13-02-2023','dd-mm-yyyy'),'Manipal');
+
+SQL> insert into ACCIDENT values(7322, to_date('10-03-2023','dd-mm-yyyy'),'Bengaluru');
+
+SQL> insert into ACCIDENT values(7320, to_date('21-01-2023','dd-mm-yyyy'),'Mumbai');
+
+SQL> insert into ACCIDENT values(7318, to_date('24-12-2022','dd-mm-yyyy'),'Mangalore');
+
+SQL> insert into ACCIDENT values(7319, to_date('31-12-2022','dd-mm-yyyy'),'Indore');
+
+
+
+SQL> insert into OWNS values('SN-111','KA-07-WX-5331');
+
+SQL> insert into OWNS values('SN-112','KA-22-MN-2881');
+
+SQL> insert into OWNS values('SN-110','TN-19-RT-9712');
+
+SQL> insert into OWNS values('SN-112','UP-27-UH-6089');
+
+SQL> insert into OWNS values('SN-113','MH-07-MT-3412');
+
+
+
+SQL> insert into PARTICIPATED values('SN-113','MH-07-MT-3412',7319,8000);
+
+SQL> insert into PARTICIPATED values('SN-113','MH-07-MT-3412',7318,6000);
+
+SQL> insert into PARTICIPATED values('SN-110','TN-19-RT-9712',7320,12000);
+
+SQL> insert into PARTICIPATED values('SN-112','UP-27-UH-6089',7321,1000);
+
+SQL> insert into PARTICIPATED values('SN-111','KA-07-WX-5331',7322,10000);
+
+
+
+SQL> select * from  PERSON;
+
+DRIVER_ID                      NAME            ADDRESS
+------------------------------ --------------- ---------------
+SN-112                         Nithya          302-abc layout
+SN-111                         Juhi            789-brb layout
+SN-110                         Pooja           123-mbm layout
+SN-113                         Nandini         102-mrm layout
+SN-114                         Ram             145-com layout
+SN-115                         Shyam           275-pam layout
+
+6 rows selected.
+
+SQL> select * from  CAR;
+
+REGNO                MODEL                                YEAR
+-------------------- ------------------------------ ----------
+KA-22-MN-2881        Toyota                               2021
+KA-07-WX-5331        Nissan                               2020
+TN-19-RT-9712        Ford                                 2022
+MH-07-MT-3412        Jaguar                               2022
+TS-27-UH-6089        Honda                                2021
+UP-27-UH-6089        Kia                                  2023
+
+6 rows selected.
+
+SQL> select * from  ACCIDENT;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- --------------------------------------------------
+         7321 13-FEB-23 Manipal
+         7322 10-MAR-23 Bengaluru
+         7320 21-JAN-23 Mumbai
+         7318 24-DEC-22 Mangalore
+         7319 31-DEC-22 Indore
+
+SQL> select * from  OWNS;
+
+DRIVER_ID                      REGNO
+------------------------------ --------------------
+SN-110                         TN-19-RT-9712
+SN-111                         KA-07-WX-5331
+SN-112                         KA-22-MN-2881
+SN-112                         UP-27-UH-6089
+SN-113                         MH-07-MT-3412
+
+SQL> select * from  PARTICIPATED;
+
+DRIVER_ID                      REGNO                REPORT_NUMBER DAMAGE_AMOUNT
+------------------------------ -------------------- ------------- -------------
+SN-113                         MH-07-MT-3412                 7319          8000
+SN-113                         MH-07-MT-3412                 7318          6000
+SN-110                         TN-19-RT-9712                 7320         25000
+SN-112                         UP-27-UH-6089                 7321          1000
+SN-111                         KA-07-WX-5331                 7322         10000
+
+
+
+
+
+SQL> update PARTICIPATED set damage_amount=25000 where report_number=7320;
+
+1 row updated.
+
+
+
+
+
+SQL> alter table PARTICIPATED drop constraint k3;
+
+Table altered.
+
+SQL> alter table PARTICIPATED add constraint k3 foreign key(report_number) references ACCIDENT(report_number) on delete cascade;
+
+Table altered.
+
+SQL> delete from ACCIDENT where extract(year from accd_date)=2022;
+
+2 rows deleted.
+
+SQL> select * from PARTICIPATED;
+
+DRIVER_ID                      REGNO                REPORT_NUMBER DAMAGE_AMOUNT
+------------------------------ -------------------- ------------- -------------
+SN-110                         TN-19-RT-9712                 7320         25000
+SN-112                         UP-27-UH-6089                 7321          1000
+SN-111                         KA-07-WX-5331                 7322         10000
+
+SQL> select * from ACCIDENT;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- --------------------------------------------------
+         7321 13-FEB-23 Manipal
+         7322 10-MAR-23 Bengaluru
+         7320 21-JAN-23 Mumbai
+
+
+
+SQL> alter table PERSON add Age int;
+
+Table altered.
+
+SQL> update PERSON set AGE=20;
+
+6 rows updated.
+
+SQL> select * from PERSON;
+
+DRIVER_ID                      NAME            ADDRESS                AGE
+------------------------------ --------------- --------------- ----------
+SN-112                         Nithya          302-abc layout          20
+SN-111                         Juhi            789-brb layout          20
+SN-110                         Pooja           123-mbm layout          20
+SN-113                         Nandini         102-mrm layout          20
+SN-114                         Ram             145-com layout          20
+SN-115                         Shyam           275-pam layout          20
+
+6 rows selected.
+
+SQL> alter table PERSON drop column age;
+
+Table altered.
+
+SQL> select * from PERSON;
+
+DRIVER_ID                      NAME            ADDRESS
+------------------------------ --------------- ---------------
+SN-112                         Nithya          302-abc layout
+SN-111                         Juhi            789-brb layout
+SN-110                         Pooja           123-mbm layout
+SN-113                         Nandini         102-mrm layout
+SN-114                         Ram             145-com layout
+SN-115                         Shyam           275-pam layout
+
+6 rows selected.
+
+
+
+SQL> Alter table PARTICIPATED add check (damage_amount>=1000);
+
+Table altered.
+
+SQL> insert into PARTICIPATED values('SN-113','MH-07-MT-3412',7321,500);
+insert into PARTICIPATED values('SN-113','MH-07-MT-3412',7321,500)
+*
+ERROR at line 1:
+ORA-02290: check constraint (CCE302.SYS_C0015660) violated
+

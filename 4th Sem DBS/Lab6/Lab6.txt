@@ -1,0 +1,209 @@
+(2)
+
+SQL> CREATE OR REPLACE TRIGGER on_accident
+  2  BEFORE  INSERT OR UPDATE on participated
+  3  For each row
+  4  declare
+  5  p_name person.name%type;
+  6  p_id person.driver_id%type;
+  7  p_addr person.Address%type;
+  8  BEGIN
+  9  if INSERTING then
+ 10  SELECT driver_id, name, address
+ 11  INTO p_id, p_name, p_addr
+ 12  FROM person
+ 13  WHERE driver_id = :new.driver_id;
+ 14  dbms_output.put_line('name : '||p_name||' driver id : '||p_id||' address : '||p_addr);
+ 15  END if;
+ 16  END;
+ 17  /
+
+Trigger created.
+
+SQL> set serveroutput on;
+SQL> insert into participated values('SN-110','TN-19-RT-9712',7322,20000);
+name : Pooja driver id : SN-110 address : 123-mbm layout
+name : Pooja driver id : SN-110 address : 123-mbm layout
+
+(3)
+
+SQL> create or replace function retTotAcc(givenY varchar)
+  2  return number as acccount integer;
+  3  BEGIN
+  4  select count(*) into acccount from ACCIDENT
+  5  where extract(year from accd_date)=givenY;
+  6  dbms_output.put_line('Total accidents in ' || givenY || ':');
+  7  return acccount;
+  8  END;
+  9  /
+
+Function created.
+
+
+SQL> select * from ACCIDENT;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- --------------------------------------------------
+         2311 13-FEB-08 Manipal
+         2312 17-DEC-08 Mangalore
+         2313 19-JUL-08 Mumbai
+         7321 13-FEB-23 Manipal
+         7322 10-MAR-23 Bengaluru
+         7320 21-JAN-23 Mumbai
+
+6 rows selected.
+
+
+SQL> set serveroutput on;
+SQL> declare totcount integer;
+  2  BEGIN
+  3  totcount:=retTotAcc(2023);
+  4  dbms_output.put_line(totcount);
+  5  END;
+  6  /
+Total accidents in 2023:
+3
+
+(Taking user input)
+SQL> set serveroutput on;
+SQL> declare
+  2  totcount integer;
+  3  year number:=&year;
+  4  BEGIN
+  5  totcount:=retToTAcc(year);
+  6  dbms_output.put_line(totcount);
+  7  END;
+  8  /
+Enter value for year: 2008
+old   3: year number:=&year;
+new   3: year number:=2008;
+Total accidents in 2008:
+3
+
+
+(4)
+
+SQL> create or replace procedure totDamage(drivID varchar, accYear varchar) is
+  2  sumDamage number;
+  3  BEGIN
+  4  select sum(damage_amount) into sumDamage from participated natural join accident
+  5  where participated.driver_id=drivID and extract(year from accd_date)=accYear;
+  6  dbms_output.put_line('Total Damage:' || sumDamage);
+  7  END;
+  8  /
+
+Procedure created.
+
+SQL> execute totDamage('SN-112','2008');
+Total Damage:30000
+
+PL/SQL procedure successfully completed.
+
+
+(Taking user input)
+SQL> execute totDamage(&id, &year);
+Enter value for id: 'SN-111'
+Enter value for year: '2023'
+Total Damage:20000
+
+PL/SQL procedure successfully completed.
+
+
+(5)
+
+SQL> select * from ACCIDENT;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- --------------------------------------------------
+         2311 13-FEB-08 Manipal
+         2312 17-DEC-08 Mangalore
+         2313 19-JUL-08 Mumbai
+         7321 13-FEB-23 Manipal
+         7322 10-MAR-23 Bengaluru
+         7320 21-JAN-23 Mumbai
+
+6 rows selected.
+
+SQL> create or replace procedure dispAcc(place varchar) is
+  2  BEGIN
+  3  For i in(
+  4  select * from ACCIDENT where ACCIDENT.location=place)
+  5  loop
+  6  dbms_output.put_line('Report Number:' || i.report_number || ', Date:' || i.accd_date || ', Location:' || i.location);
+  7  END loop;
+  8  END;
+  9  /
+
+Procedure created.
+
+SQL> set serveroutput on;
+SQL> execute dispAcc(&place);
+Enter value for place: 'Manipal'
+Report Number:2311, Date:13-FEB-08, Location:Manipal
+Report Number:7321, Date:13-FEB-23, Location:Manipal
+
+(6)
+
+SQL> select * from customer;
+
+     CUST# CNAME           CITY
+---------- --------------- ------------------------------
+         1 JOHN            BLORE
+         2 JASON           KOLAR
+         3 JKEVIN          BLORE
+         4 RAMSAY          MANIPAL
+         5 VIKAS           MYSORE
+
+SQL> select * from orders;
+
+    ORDER# ODATE          CUST#     ORDAMT
+---------- --------- ---------- ----------
+         1 01-JAN-22          2       5000
+         2 26-APR-23          3       7000
+         3 27-APR-22          3       6000
+         4 30-APR-22          5       1000
+         5 06-MAY-23          1       5000
+         6 28-APR-23          5        810
+         7 28-APR-23          4      12000
+
+7 rows selected.
+
+SQL> create table T1(
+  2  cust# int,
+  3  cname varchar(20),
+  4  city varchar(15));
+
+Table created.
+
+SQL> create or replace procedure insertInfo is
+  2  cursor r1 is
+  3  select cust#, sum(ordamt) as tot_amt, cname, city from customer natural join orders
+  4  group by cust#;
+  5  r2 r1%rowtype;
+  6  BEGIN
+  7  open r1;
+  8  fetch r1 into r2;
+  9  loop
+ 10  if(r2.tot_amt>10000) then
+ 11  insert into T1 values(r2.cust#, r2.cname, r2.city);
+ 12  end if;
+ 13  fetch r1 into r2;
+ 14  exit when r1%NOTFOUND;
+ 15  end loop;
+ 16  close r1;
+ 17  END;
+ 18  /
+
+Procedure created.
+
+SQL> execute insertInfo;
+
+PL/SQL procedure successfully completed.
+
+SQL> select * from T1;
+
+     CUST# CNAME                CITY
+---------- -------------------- ---------------
+         3 JKEVIN               BLORE
+         4 RAMSAY               MANIPAL
+

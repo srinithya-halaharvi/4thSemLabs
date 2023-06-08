@@ -1,0 +1,94 @@
+SQL> select * from ACCIDENT;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- --------------------------------------------------
+         2311 13-FEB-08 Manipal
+         2312 17-DEC-08 Mangalore
+         2313 19-JUL-08 Mumbai
+         7321 13-FEB-23 Manipal
+         7322 10-MAR-23 Bengaluru
+         7320 21-JAN-23 Mumbai
+
+6 rows selected.
+
+SQL> select count(distinct driver_id) from PARTICIPATED,ACCIDENT where extract(year from ACCIDENT.accd_date)=2008;
+
+COUNT(DISTINCTDRIVER_ID)
+------------------------
+                       3
+
+
+
+
+
+
+SQL> select * from CAR;
+
+REGNO                MODEL                                YEAR
+-------------------- ------------------------------ ----------
+KA-53-MH-5881        Kia                                  2005
+AP-13-KO-5383        Kia                                  2007
+MP-07-JK-3256        Tata-Mahindra                        2006
+KA-22-MN-2881        Toyota                               2021
+KA-07-WX-5331        Nissan                               2020
+TN-19-RT-9712        Ford                                 2022
+MH-07-MT-3412        Jaguar                               2022
+TS-27-UH-6089        Honda                                2021
+UP-27-UH-6089        Kia                                  2023
+
+9 rows selected.
+
+SQL> select * from PARTICIPATED;
+
+DRIVER_ID                      REGNO                REPORT_NUMBER DAMAGE_AMOUNT
+------------------------------ -------------------- ------------- -------------
+SN-112                         KA-53-MH-5881                 2311         30000
+SN-111                         AP-13-KO-5383                 2312         20000
+SN-114                         MP-07-JK-3256                 2313         27000
+SN-110                         TN-19-RT-9712                 7320         25000
+SN-112                         UP-27-UH-6089                 7321          1000
+SN-111                         KA-07-WX-5331                 7322         10000
+
+6 rows selected.
+
+SQL> select count(*) from PARTICIPATED natural join CAR where CAR.MODEL='Kia';
+
+  COUNT(*)
+----------
+         3
+
+
+
+
+
+SQL> select PERSON.name as OWNER_NAME, count(PARTICIPATED.regno) as NO_OF_ACCIDENTS, sum(PARTICIPATED.damage_amount) as TOTAL_DAMAGE from PARTICIPATED natural join PERSON
+  2  group by PERSON.name
+  3  order by sum(PARTICIPATED.damage_amount) DESC;
+
+OWNER_NAME      NO_OF_ACCIDENTS TOTAL_DAMAGE
+--------------- --------------- ------------
+Nithya                        2        31000
+Juhi                          2        30000
+Ram                           1        27000
+Pooja                         1        25000
+
+
+
+SQL> select person.name as owner_name from person natural join participated natural join accident where extract (year from accd_date)= 2008 group by name having count(report_number)>=2;
+
+OWNER_NAME          
+---------------
+Nithya
+
+
+
+
+SQL> select PERSON.name as OWNER_NAME from PERSON
+  2  minus (select PERSON.name as OWNER_NAME from PARTICIPATED natural join PERSON);
+
+OWNER_NAME
+---------------
+Nandini
+Shyam
+
+

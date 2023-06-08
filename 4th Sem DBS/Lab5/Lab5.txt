@@ -1,0 +1,356 @@
+SQL> CREATE TABLE ENROLL (
+  2  regno VARCHAR(20),
+  3  course# INT,
+  4  sem INT,
+  5  book_isbn INT,
+  6  primary key (regno, course#),
+  7  foreign key (regno) REFERENCES student ON DELETE CASCADE,
+  8  foreign key (course#) REFERENCES course ON DELETE CASCADE,
+  9  foreign key (book_isbn) REFERENCES text ON DELETE CASCADE);
+
+Table created.
+
+SQL> create table BOOK_ADOPTION(
+  2  course# int, sem int, book_isbn int, primary key(course#, book_isbn), constraint bk1 foreign key(course#) references COURSE(course#) on delete cascade);
+
+Table created.
+
+SQL> create table TEXT(
+  2  book_isbn int, booktitle varchar(25), publisher varchar(25), author varchar(25), primary key(book_isbn));
+
+Table created.
+
+SQL> alter table BOOK_ADOPTION add constraint bk2 foreign key(book_isbn) references TEXT(book_isbn) on delete cascade;
+
+Table altered.
+
+
+
+SQL> insert into STUDENT values('210953302','Srinithya','BTECH','28-NOV-2003');
+
+1 row created.
+
+SQL> insert into STUDENT values('210953318','Nandini','BTECH','26-OCT-2003');
+
+1 row created.
+
+SQL> insert into STUDENT values('210933006','Ram','BTECH','22-MAR-2003');
+
+1 row created.
+
+SQL> insert into STUDENT values('210961068','Shyam','BTECH','18-JUN-2003');
+
+1 row created.
+
+SQL> insert into STUDENT values('210901233','Sita','BTECH','03-AUG-2003');
+
+1 row created.
+
+SQL> insert into COURSE values(53,'CCE','ICT');
+
+1 row created.
+
+SQL> insert into COURSE values(11,'IT','ICT');
+
+1 row created.
+
+SQL> insert into COURSE values(33,'AERO','AAE');
+
+1 row created.
+
+SQL> insert into COURSE values(01,'BIOTECH','BIO');
+
+1 row created.
+
+SQL> insert into COURSE values(61,'CSE-AIML','CSE');
+
+1 row created.
+
+SQL> insert into ENROLL values('210953302', 53, 3, 110);
+
+1 row created.
+
+SQL> insert into ENROLL values('210953318', 53, 3, 110);
+
+1 row created.
+
+SQL> insert into ENROLL values('210933006', 33, 3, 114);
+
+1 row created.
+
+SQL> insert into ENROLL values('210901233', 01, 4, 112);
+
+1 row created.
+
+SQL> insert into ENROLL values('210961068', 61, 4, 111);
+
+1 row created.
+
+SQL> insert into TEXT values(110,'Java','Rupa publications','Harry');
+
+1 row created.
+
+SQL> insert into TEXT values(111,'Algorithms','Rupa publications','Sahani');
+
+1 row created.
+
+SQL> insert into TEXT values(112,'Organic Chemistry','Willey publications','Willey');
+
+1 row created.
+
+SQL> insert into TEXT values(113,'DataBase','McGraw publications','Henry');
+
+1 row created.
+
+SQL> insert into TEXT values(114,'Operating Systems','McGraw publications','Ramnath');
+
+1 row created.
+
+SQL> insert into BOOK_ADOPTION values(53,3,110);
+
+1 row created.
+
+SQL> insert into BOOK_ADOPTION values(53,3,111);
+
+1 row created.
+
+SQL> insert into BOOK_ADOPTION values(53,3,113);
+
+1 row created.
+
+SQL> insert into BOOK_ADOPTION values(33,3,114);
+
+1 row created.
+
+SQL> insert into BOOK_ADOPTION values(01,4,112);
+
+1 row created.
+
+SQL> insert into BOOK_ADOPTION values(61,4,111);
+
+1 row created.
+
+SQL> insert into BOOK_ADOPTION values(61,3,110);
+
+1 row created.
+
+SQL> insert into BOOK_ADOPTION values(61,4,114);
+
+1 row created.
+
+
+
+
+SQL> select * from STUDENT;
+
+REGNO                NAME                      MAJOR                BDATE
+-------------------- ------------------------- -------------------- ---------
+210953302            Srinithya                 BTECH                28-NOV-03
+210953318            Nandini                   BTECH                26-OCT-03
+210933006            Ram                       BTECH                22-MAR-03
+210961068            Shyam                     BTECH                18-JUN-03
+210901233            Sita                      BTECH                03-AUG-03
+
+SQL> select * from COURSE;
+
+   COURSE# CNAME                          DEPT
+---------- ------------------------------ ------------------------------
+        53 CCE                            ICT
+        11 IT                             ICT
+        33 AERO                           AAE
+         1 BIOTECH                        BIO
+        61 CSE-AIML                       CSE
+
+SQL> select * from ENROLL;
+
+REGNO                   COURSE#        SEM  BOOK_ISBN
+-------------------- ---------- ---------- ----------
+210953302                    53          3        110
+210953318                    53          3        110
+210933006                    33          3        114
+210901233                     1          4        112
+210961068                    61          4        111
+
+SQL> select * from BOOK_ADOPTION;
+
+   COURSE#        SEM  BOOK_ISBN
+---------- ---------- ----------
+        53          3        110
+        53          3        111
+        53          3        113
+        33          3        114
+         1          4        112
+        61          4        111
+        61          3        110
+        61          4        114
+
+8 rows selected.
+
+SQL> select * from TEXT;
+
+ BOOK_ISBN BOOKTITLE                 PUBLISHER
+---------- ------------------------- -------------------------
+AUTHOR
+-------------------------
+       110 Java                      Rupa publications
+Harry
+
+       111 Algorithms                Rupa publications
+Sahani
+
+       112 Organic Chemistry         Willey publications
+Willey
+
+
+ BOOK_ISBN BOOKTITLE                 PUBLISHER
+---------- ------------------------- -------------------------
+AUTHOR
+-------------------------
+       113 DataBase                  McGraw publications
+Henry
+
+       114 Operating Systems         McGraw publications
+Ramnath
+
+
+
+(a)
+
+SQL> select cname as COURSE_NAME from COURSE where course# in(
+  2  select course# from BOOK_ADOPTION group by course# having count(course#)>1);
+
+COURSE_NAME
+------------------------------
+CCE
+CSE-AIML
+
+
+(b)
+
+SQL> update TEXT set PUBLISHER='Rupa publications' where book_isbn=113 ;
+
+1 row updated.
+
+SQL> update BOOK_ADOPTION set book_isbn=113 where book_isbn=114 and course#=61 ;
+
+1 row updated.
+
+SQL> select distinct dept from COURSE,BOOK_ADOPTION,TEXT where COURSE.course#=BOOK_ADOPTION.course# and BOOK_ADOPTION.book_isbn=TEXT.book_isbn and TEXT.book_isbn in(
+  2  select book_isbn from TEXT where publisher='Rupa publications');
+
+DEPT
+------------------------------
+CSE
+ICT
+
+
+(c)
+
+SQL> insert into ENROLL values('210953302', 61, 3, 110);
+
+1 row created.
+
+SQL> insert into ENROLL values('210961068', 53, 4, 111);
+
+1 row created.
+
+SQL> select distinct STUDENT.regno, name from STUDENT,ENROLL where STUDENT.regno=ENROLL.regno and ENROLL.regno in(
+  2  select regno from ENROLL group by regno having count(regno)>1);
+
+REGNO                NAME
+-------------------- -------------------------
+210953302            Srinithya
+210961068            Shyam
+
+
+(d)
+
+SQL> insert into STUDENT values('210953002','Mehga','BTech','24-MAR-2003');
+
+1 row created.
+
+SQL> insert into STUDENT values('210933212','Srindhi','BTech','09-APR-2003');
+
+1 row created.
+
+SQL> insert into STUDENT values('210907212','Suraj','BTech','29-JAN-2003');
+
+1 row created.
+
+SQL> select regno, name from STUDENT where regno not in(
+  2  select regno from ENROLL);
+
+REGNO                NAME
+-------------------- -------------------------
+210907212            Suraj
+210933212            Srindhi
+210953002            Mehga
+
+
+(f)
+
+SQL> select BOOK_ADOPTION.book_isbn, booktitle from BOOK_ADOPTION,TEXT where BOOK_ADOPTION.book_isbn=TEXT.book_isbn and BOOK_ADOPTION.book_isbn in(
+  2  select distinct book_isbn from ENROLL);
+
+ BOOK_ISBN BOOKTITLE
+---------- -------------------------
+       110 Java
+       110 Java
+       111 Algorithms
+       111 Algorithms
+       112 Organic Chemistry
+       114 Operating Systems
+
+
+(g)
+
+SQL> select distinct cname as COURSE_NAME from COURSE c,BOOK_ADOPTION b,TEXT t where
+  2  c.course#=b.course# and b.book_isbn=t.book_isbn and t.publisher in(
+  3  select publisher from text
+  4  group by publisher having count(publisher)>=2);
+
+COURSE_NAME
+------------------------------
+CSE-AIML
+CCE
+
+(e)
+
+select distinct dept from course natural join book_adoption where book_isbn in(
+  2  select book_isbn from text where publisher='Rupa publications');
+
+(h)
+
+SQL> select name, regno from student natural join enroll group by name,regno having count(*)>=all(
+  2  select count(regno) from enroll group by regno);
+
+NAME                      REGNO
+------------------------- --------------------
+Srinithya                 210953302
+Shyam                     210961068
+
+(i)
+
+SQL> select publisher, count(publisher) from text group by publisher;
+
+PUBLISHER                 COUNT(PUBLISHER)
+------------------------- ----------------
+McGraw publications                      1
+Rupa publications                        3
+Willey publications                      1
+
+(j)
+
+(e)
+
+SQL> select distinct dept from course where not exists((
+  2  select book_isbn from text where publisher='Rupa publications')
+  3  minus(
+  4  select t.book_isbn from book_adoption b, text t where b.book_isbn=t.book_isbn));
+
+DEPT
+------------------------------
+BIO
+AAE
+CSE
+ICT
